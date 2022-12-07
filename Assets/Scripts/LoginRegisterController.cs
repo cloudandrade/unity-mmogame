@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using TMPro;
 
@@ -23,10 +24,34 @@ public class LoginRegisterController : MonoBehaviour
 
     public void Login()
     {
-        Debug.Log("Login");
-        Debug.Log(userNameEmailLogin.text);
-        Debug.Log("Senha");
-        Debug.Log(senhaLogin.text);
+        Debug.Log("Login: " + userNameEmailLogin.text + " Senha: " + senhaLogin.text);
+
+        Debug.Log("realizando login . . .");
+
+        StartCoroutine(Login_Coroutine());
+       
+        Debug.Log("tentativa finalizada");
+    }
+
+     IEnumerator Login_Coroutine()
+    {
+        string uriBase = "https://game-server-ifrit.herokuapp.com";
+        string loginUri = uriBase + "/player/login";
+        WWWForm form = new WWWForm();
+        form.AddField("login", userNameEmailLogin.text);
+        form.AddField("senha", senhaLogin.text);
+
+        using (UnityWebRequest request = UnityWebRequest.Post(loginUri, form))
+        {
+            yield return request.SendWebRequest();
+            if (request.isNetworkError || request.isHttpError)
+                Debug.Log("Erro na requisição: " + request.error);
+            else
+                Debug.Log("Usuário Logado com sucesso");
+            Debug.Log("Dados da requisição: ");
+            Debug.Log(request.downloadHandler.text);
+        }
+
     }
 
     public void Register()
